@@ -18,9 +18,10 @@ Move _begin_partial in child classes to CommonMachine
 class CommonMachine():
     def _begin_partial(self, readed_sequence=None):
         if readed_sequence is not None:
-            self.new_partial = readed_sequence[0]
+            self.readed_partial = readed_sequence[0]
         else:
-            self.new_partial = self.readed_sequence[0]
+            self.readed_partial = self.readed_sequence[0]
+        self.new_partial = self.readed_partial
 
 class SliceMachine1(CommonMachine):
     """slice when no need to handle existed word partial"""
@@ -42,12 +43,6 @@ class SliceMachine2(CommonMachine):
             self.readed_sequence = readed_sequence
             print "self.readed_sequence:", self.readed_sequence
 
-#    def _begin_partial(self, readed_sequence=None):
-#        if readed_sequence is not None:
-#            self.new_partial =  readed_sequence[0]
-#        else:
-#            self.new_partial = self.readed_sequence[0]
-
     def _cut_previous(self):
         self.cutted = self.previous_partial
 
@@ -57,7 +52,7 @@ class SliceMachine2(CommonMachine):
         self.slice_result = [self.cutted, self.new_partial]
         return self.slice_result
 
-class SliceMachine3():
+class SliceMachine3(CommonMachine):
     """slice when need to handle existed word partial and append it with new partial"""
     def __init__(self, partial=None, readed_sequence=None):
         if partial is not None:
@@ -67,10 +62,8 @@ class SliceMachine3():
             print "self.readed_sequence:", self.readed_sequence
 
     def _append_partial(self, readed_sequence=None):
-        if readed_sequence is not None:
-            self.new_partial = self.previous_partial + readed_sequence[0]
-        else:
-            self.new_partial = self.previous_partial + self.readed_sequence[0]
+        self._begin_partial(readed_sequence)
+        self.new_partial = self.previous_partial + self.readed_partial
 
     def slice_to_append(self):
         self._append_partial()
