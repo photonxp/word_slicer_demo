@@ -3,77 +3,76 @@
 
 """
 to do:
-*Move input handlers to another module.
-*Handle the input continously until EOF.
-*Rename the variables used.
-*Join the list of words sliced.
+*Add class SliceMachineSingletonFactory, to deal with singleton slice machines
+*Remov class SliceMachine1 and renamed SliceMachine2 to SliceMachine1, SliceMachine3 to SliceMachine2
+*Join() the list of words sliced.
+*Move the test statements to unittest.
 """
 
 '''
 done:
+*Added more input handlers for different stage of handling.
 *Modified _begin_partial, _cut_and_part methods for common machine and machine3.
+*Move input handlers to another module.
+*Handle the input continously until EOF.
+*Rename a few variables used around.
+*Add a Server class to store the variables processed or needed, e.g. the cutted word list.
+
 '''
 
-"""Define operations for different indications on letters"""
+"""Define operations for various repeated marks on letters"""
 
-letter_marked = 'r'
-partial = {'previous':'STORED_PREVIOUS','readed':letter_marked}
+class StateMachineSingletonFactory():
+    def __init__(self):
+        self.MACHINE_1_IS_SINGLE = False
+        self.MACHINE_2_IS_SINGLE = False
+        self.MACHINE_3_IS_SINGLE = False
+        
+    def dispatch_machine(self,mark):
+        """get the proper slice machine after check and set it successfully"""
+        self.mark = mark
+        self.set_slice_machine()
+        return self.sm
+        
+    def set_slice_machine(self):
+        mark = self.mark
 
-previous_partial = partial['previous']
+        if 'B' == mark:
+            self.set_machine_2_singleton()
+        if 'I' == mark:
+            self.set_machine_3_singleton()
 
-SLICE_STATE_1 = ['',[letter_marked,'B'],'SliceMachine1']
-SLICE_STATE_2 = [previous_partial,[letter_marked,'B'],'SliceMachine2']
-SLICE_STATE_3 = [previous_partial,[letter_marked,'I'],'SliceMachine3']
-
-def slice_line(line,prev_slice_result,cutted_list):
-    parsed = parse_line(line)
-    sm = package_handler(prev_slice_result[1],parsed)
-    slice_result, cl = result_handler(res,cutted_list)
-
-def parse_line(line):
-    splitter = "   "
-    splitted = line.split(splitter)
-    print "splitted:", splitted
-    #parsed = (splitted[0], splitted[1])
-    return splitted[0],splitted[1]
-
-def repack_parsed(slice_res, parsed_sequence):
-    cutted,partial = slice_res[1]
-    return partial,parsed_sequence
-
-def package_handler(previous_partial, parsed_sequence):
-    assert previous_partial is not None
-    if '' == previous_partial:
-        sm = SliceMachine1(parsed_sequence)
-    if '' != previous_partial:
-        if 'B' == readed_sequence[1]:
-            sm = SliceMachine2(previous_partial, parsed_sequence)
-        if 'I' == readed_sequence[1]:
-            sm = SliceMachine3(previous_partial, parsed_sequence)
-    
-    sm.do_slice()
-    return sm
-
-def result_handler(res,cutted_list=[]):
-    assert len(res) > 0
-    if '' != res[0]:
-        cutted_list.append(res[0])
-    return (res,cutted_list)
-
+    def set_machine_1_singleton(self):
+        if self.MACHINE_1_IS_SINGLE == False:
+            self.slicemachine1 = SliceMachine1(self.parsed_sequence)
+            self.MACHINE_1_IS_SINGLE = True
+        self.sm = self.slicemachine1     
+        
+    def set_machine_2_singleton(self):
+        if self.MACHINE_2_IS_SINGLE == False:
+            self.slicemachine2 = SliceMachine2()
+            self.MACHINE_2_IS_SINGLE = True
+        self.sm = self.slicemachine2
+        
+    def set_machine_3_singleton(self):
+        if self.MACHINE_3_IS_SINGLE == False:
+            self.slicemachine3 = SliceMachine3()
+            self.MACHINE_3_IS_SINGLE = True
+        self.sm = self.slicemachine3
 
 class CommonMachine():
-    def _set_readed_partial(self, readed_sequence=None):
-        if readed_sequence is not None:
-            self.readed_partial = readed_sequence[0]
+    def _set_readed_partial(self, parsed_sequence=None):
+        if parsed_sequence is not None:
+            self.readed_partial = parsed_sequence[0]
         else:
-            self.readed_partial = self.readed_sequence[0]
+            self.readed_partial = self.parsed_sequence[0]
             
-    def _begin_partial(self, readed_sequence=None):
+    def _begin_partial(self, parsed_sequence=None):
         self.new_partial = self.readed_partial
 
     def _cut_and_part(self):
-        self._set_readed_partial()
         self._cut_previous()
+        self._set_readed_partial()
         self._begin_partial()
         self.slice_result = [self.cutted, self.new_partial]
         return self.slice_result
@@ -83,10 +82,9 @@ class CommonMachine():
 
 class SliceMachine1(CommonMachine):
     """slice when no need to handle existed word partial"""
-    def __init__(self, readed_sequence=None):
+    def __init__(self, readed_sequence):
         if readed_sequence is not None:
             self.readed_sequence = readed_sequence
-            print "self.readed_sequence:", self.readed_sequence
 
     def _cut_previous(self):
         self.cutted = ''
@@ -96,46 +94,47 @@ class SliceMachine1(CommonMachine):
 
 class SliceMachine2(CommonMachine):
     """slice when need to handle existed word partial"""
-    def __init__(self, partial=None, readed_sequence=None):
+    def __init__(self, partial=None, parsed_sequence=None):
         if partial is not None:
             self.previous_partial = partial
-        if readed_sequence is not None:
-            self.readed_sequence = readed_sequence
-            print "self.readed_sequence:", self.readed_sequence
+        if parsed_sequence is not None:
+            self.parsed_sequence = parsed_sequence
+        print "Hi, I'm SliceMachine2, I am called........."
 
     def _cut_previous(self):
         self.cutted = self.previous_partial
 
     def do_slice(self):
+        print "Hi, I'm SliceMachine2, I am doing the slice........."
         return self._cut_and_part()
 
 class SliceMachine3(CommonMachine):
     """
-    slice when need to handle existed word partial
-     and append it with prevous partial to generate new partia
+    Slice when need to handle existed word partial
+     and append it with prevous partial to generate new partial.
     """
-    def __init__(self, partial=None, readed_sequence=None):
+    def __init__(self, partial=None, parsed_sequence=None):
         if partial is not None:
             self.previous_partial = partial
-        if readed_sequence is not None:
-            self.readed_sequence = readed_sequence
-            print "self.readed_sequence:", self.readed_sequence
+        if parsed_sequence is not None:
+            self.parsed_sequence = parsed_sequence
+        print "Hi, I'm SliceMachine3, I am called........."
 
     def _cut_previous(self):
         self.cutted = ""
 
     def _append_partial(self, readed_sequence=None):
-        self._begin_partial(readed_sequence)
         self.new_partial = self.previous_partial + self.readed_partial
         
     def _cut_and_part(self):
-        self._set_readed_partial()
         self._cut_previous()
+        self._set_readed_partial()
         self._append_partial()
         self.slice_result = [self.cutted, self.new_partial]
         return self.slice_result
 
     def do_slice(self):
+        print "Hi, I'm SliceMachine3, I am doing the slice........."
         return self._cut_and_part()
 
 
@@ -143,7 +142,7 @@ if __name__ == "__main__":
 
     print 'OK'
 
-    cutted_list =[]
+'''
 
     readed_sequence = ['m','B']
     sm1 = SliceMachine1(readed_sequence)
@@ -173,7 +172,7 @@ if __name__ == "__main__":
     readed_s=['k','B']
     sm = package_handler(p_partial, readed_s)
     print sm.slice_result
-    print "sm.new_partial:",sm.new_partial
+    #print "sm.previous_partial:",sm.previous_partial
     print "sm.new_partial:",sm.new_partial
     cl = result_handler(sm.slice_result, cl)[1]
     print cl
@@ -195,3 +194,19 @@ if __name__ == "__main__":
     
     pl = parse_line("x   I")
     print pl
+    
+    # slice line
+    line = "r   B"
+    prev_slice_result = ('pa','xxx')
+    cutted_list = ['mmm']
+    res = slice_line(line, prev_slice_result, cutted_list)
+    print res
+    
+    # slice lines
+    lines = file_handler("/home/linnan/IT/python_projects/various_codes/nlp/word_slice/data")
+    prev_slice_result = ['cc','pp']
+    cutted_list = ['www']
+    cl = slice_lines(lines,prev_slice_result,cutted_list)
+    print cl 
+    
+'''
