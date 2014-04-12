@@ -7,7 +7,12 @@ At least, return the cutted list
 """
 
 from operations import StateMachineSingletonFactory
-from operations import SliceMachine2,SliceMachine3,CommonMachine
+from operations import SliceMachine1, SliceMachine2, CommonMachine
+
+
+'''
+Write the document as code
+'''
 
 letter_marked = 'r'
 partial = {'previous':'STORED_PREVIOUS','readed':letter_marked}
@@ -15,8 +20,8 @@ partial = {'previous':'STORED_PREVIOUS','readed':letter_marked}
 stored_previous_partial = partial['previous']
 
 
-SLICE_STATE_2 = [stored_previous_partial,[letter_marked,'B'],'SliceMachine2']
-SLICE_STATE_3 = [stored_previous_partial,[letter_marked,'I'],'SliceMachine3']
+SLICE_STATE_1 = [stored_previous_partial,[letter_marked,'B'],'SliceMachine1']
+SLICE_STATE_2 = [stored_previous_partial,[letter_marked,'I'],'SliceMachine2']
 
 class Server():
     def __init__(self,cutted_list=[]):
@@ -82,7 +87,6 @@ class Server():
         
     def update_cutted_list(self):
         cutted = self.sm.slice_result[0]
-        #print "==update_cutted_list==", cutted
         if '' != cutted:
             self.cutted_list.append(cutted)
 

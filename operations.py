@@ -3,21 +3,13 @@
 
 """
 to do:
-*Add class SliceMachineSingletonFactory, to deal with singleton slice machines
-*Remov class SliceMachine1 and renamed SliceMachine2 to SliceMachine1, SliceMachine3 to SliceMachine2
 *Join() the list of words sliced.
 *Move the test statements to unittest.
 """
 
 '''
 done:
-*Added more input handlers for different stage of handling.
-*Modified _begin_partial, _cut_and_part methods for common machine and machine3.
-*Move input handlers to another module.
-*Handle the input continously until EOF.
-*Rename a few variables used around.
-*Add a Server class to store the variables processed or needed, e.g. the cutted word list.
-
+*Remov class SliceMachine1 and renamed SliceMachine2 to SliceMachine1, SliceMachine3 to SliceMachine2
 '''
 
 """Define operations for various repeated marks on letters"""
@@ -26,7 +18,6 @@ class StateMachineSingletonFactory():
     def __init__(self):
         self.MACHINE_1_IS_SINGLE = False
         self.MACHINE_2_IS_SINGLE = False
-        self.MACHINE_3_IS_SINGLE = False
         
     def dispatch_machine(self,mark):
         """get the proper slice machine after check and set it successfully"""
@@ -38,27 +29,21 @@ class StateMachineSingletonFactory():
         mark = self.mark
 
         if 'B' == mark:
-            self.set_machine_2_singleton()
+            self.set_machine_1_singleton()
         if 'I' == mark:
-            self.set_machine_3_singleton()
-
+            self.set_machine_2_singleton()  
+        
     def set_machine_1_singleton(self):
         if self.MACHINE_1_IS_SINGLE == False:
-            self.slicemachine1 = SliceMachine1(self.parsed_sequence)
+            self.slicemachine1 = SliceMachine1()
             self.MACHINE_1_IS_SINGLE = True
-        self.sm = self.slicemachine1     
+        self.sm = self.slicemachine1
         
     def set_machine_2_singleton(self):
         if self.MACHINE_2_IS_SINGLE == False:
             self.slicemachine2 = SliceMachine2()
             self.MACHINE_2_IS_SINGLE = True
         self.sm = self.slicemachine2
-        
-    def set_machine_3_singleton(self):
-        if self.MACHINE_3_IS_SINGLE == False:
-            self.slicemachine3 = SliceMachine3()
-            self.MACHINE_3_IS_SINGLE = True
-        self.sm = self.slicemachine3
 
 class CommonMachine():
     def _set_readed_partial(self, parsed_sequence=None):
@@ -81,34 +66,22 @@ class CommonMachine():
         pass
 
 class SliceMachine1(CommonMachine):
-    """slice when no need to handle existed word partial"""
-    def __init__(self, readed_sequence):
-        if readed_sequence is not None:
-            self.readed_sequence = readed_sequence
-
-    def _cut_previous(self):
-        self.cutted = ''
-
-    def do_slice(self):
-        return self._cut_and_part()
-
-class SliceMachine2(CommonMachine):
     """slice when need to handle existed word partial"""
     def __init__(self, partial=None, parsed_sequence=None):
         if partial is not None:
             self.previous_partial = partial
         if parsed_sequence is not None:
             self.parsed_sequence = parsed_sequence
-        print "Hi, I'm SliceMachine2, I am called........."
+        print "Hi, I'm SliceMachine1, I am called........."
 
     def _cut_previous(self):
         self.cutted = self.previous_partial
 
     def do_slice(self):
-        print "Hi, I'm SliceMachine2, I am doing the slice........."
+        print "Hi, I'm SliceMachine1, I am doing the slice........."
         return self._cut_and_part()
 
-class SliceMachine3(CommonMachine):
+class SliceMachine2(CommonMachine):
     """
     Slice when need to handle existed word partial
      and append it with prevous partial to generate new partial.
@@ -118,7 +91,7 @@ class SliceMachine3(CommonMachine):
             self.previous_partial = partial
         if parsed_sequence is not None:
             self.parsed_sequence = parsed_sequence
-        print "Hi, I'm SliceMachine3, I am called........."
+        print "Hi, I'm SliceMachine2, I am called........."
 
     def _cut_previous(self):
         self.cutted = ""
@@ -134,7 +107,7 @@ class SliceMachine3(CommonMachine):
         return self.slice_result
 
     def do_slice(self):
-        print "Hi, I'm SliceMachine3, I am doing the slice........."
+        print "Hi, I'm SliceMachine2, I am doing the slice........."
         return self._cut_and_part()
 
 
