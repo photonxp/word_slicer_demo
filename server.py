@@ -20,15 +20,18 @@ partial = {'previous':'STORED_PREVIOUS','readed':letter_marked}
 stored_previous_partial = partial['previous']
 
 
-SLICE_STATE_1 = [stored_previous_partial,[letter_marked,'B'],'SliceMachine1']
-SLICE_STATE_2 = [stored_previous_partial,[letter_marked,'I'],'SliceMachine2']
+SLICE_STATE_1 = (stored_previous_partial,[letter_marked,'B'],'SliceMachine1')
+SLICE_STATE_2 = (stored_previous_partial,[letter_marked,'I'],'SliceMachine2')
 
 class Server():
     def __init__(self,cutted_list=[]):
+        print "... Impossible ... Could cutted_list be changed?:", cutted_list 
         self.cutted_list = cutted_list
+        print "Soooooo strange, am I [] or ['cuu']? :", self.cutted_list 
         self.stored_previous_partial = ''
         self.new_partial = ''
         self.singleton_factory = StateMachineSingletonFactory()
+        print "Finished singleton_factory, am I changed at cutted_list? :", self.cutted_list 
         
     def file_handler(self,data_path):
         self.data_path = data_path
@@ -54,14 +57,14 @@ class Server():
 
     def slice_line(self):
         self.parse_line(self.prepared_line)
-        self.package_handler()
+        self.handle_package()
 
         
     def parse_line(self,line):
         splitter = "   " # or "\b{3}" for re module
         self.parsed_sequence = line.split(splitter)
         
-    def package_handler(self):
+    def handle_package(self):
         assert self.stored_previous_partial is not None
         self.take_machine()
         self.update_machine_data_before_slice()
@@ -75,6 +78,7 @@ class Server():
     def update_machine_data_before_slice(self):
         self.sm.previous_partial = self.stored_previous_partial
         self.sm.parsed_sequence = self.parsed_sequence
+        self.sm.mark = self.mark
             
     def handle_result(self):
         assert len(self.sm.slice_result) > 0
@@ -84,19 +88,32 @@ class Server():
     def update_server_data(self):
         self.update_cutted_list()
         self.stored_previous_partial = self.slice_result[1]
+        self.cutted = self.slice_result[0]
         
     def update_cutted_list(self):
         cutted = self.sm.slice_result[0]
         if '' != cutted:
             self.cutted_list.append(cutted)
+            
+    def sliced_list_to_line(self):
+        lines = ""
+        for line in self.cutted_list:
+            if "\n" != line:
+                lines = lines + line + "\n"
+        return lines
+            
 
         
 if __name__ == "__main__":
+    pass
+
     sv = Server()
     data_path = "/home/linnan/IT/python_projects/various_codes/nlp/word_slice/data"
     sv.file_handler(data_path)
     sv.slice_lines()
     cutted_list = sv.cutted_list
     print cutted_list
+    print sv.sliced_list_to_line()
     
-    # ['a', 'bc', '\n', 'def', 'ab']
+    # ['a', 'bc', '\n', 'def', 'ab']  ss
+

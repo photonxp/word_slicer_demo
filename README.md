@@ -1,4 +1,7 @@
 word_slicer_demo
 ================
 
-a simple demo to show how to slice words for letters already marked
+A simple demo to show how to slice words for letters already marked
+
+This demo can be used for nlp leaning.
+
