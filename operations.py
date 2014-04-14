@@ -10,8 +10,10 @@ todo:
 
 '''
 done:
-*Remov class SliceMachine1 and renamed SliceMachine2 to SliceMachine1, SliceMachine3 to SliceMachine2
+*Removed class SliceMachine1
+*Renamed SliceMachine2 to SliceMachine1, and SliceMachine3 to SliceMachine2
 *Join() the list of words sliced.
+*Added Tests.py
 *Move the test statements to unittest.
 '''
 

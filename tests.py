@@ -43,7 +43,7 @@ class ServerTest(unittest.TestCase):
 
     def test_init(self):
         print "::test_init starts ..."
-        sv = Server()
+        sv = Server(cutted_list=[])
         self.assertEquals('',sv.stored_previous_partial)
         self.assertEquals('',sv.new_partial)
         self.assertTrue(isinstance(sv.singleton_factory,StateMachineSingletonFactory))
@@ -75,7 +75,7 @@ class ServerTest(unittest.TestCase):
       
     def test_take_machine(self):
         print "::test_take_machine starts ..."
-        sv = Server()
+        sv = Server(cutted_list=[])
         sv.parsed_sequence = ('c','B')
         self.assertEquals([],sv.cutted_list)
         sv.take_machine()
@@ -152,7 +152,7 @@ class ServerTest(unittest.TestCase):
         
     def test_slice_lines(self):
         print "::test_slice_lines starts ..."
-        sv = Server()
+        sv = Server(cutted_list=[])
         self.assertEquals('',sv.stored_previous_partial)
         self.assertEquals('',sv.new_partial)
         self.assertEquals([],sv.cutted_list)
