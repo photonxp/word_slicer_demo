@@ -10,12 +10,9 @@ todo:
 
 '''
 done:
-*Removed class SliceMachine1
-*Renamed SliceMachine2 to SliceMachine1, and SliceMachine3 to SliceMachine2
-*Join() the list of words sliced.
-*Added Tests.py
-*Move the test statements to unittest.
+*Fix test methods test_init, test_take_machine, test_slice_lines for ServerTest, though root causes of the test failure are still unclear.
 '''
+
 
 class StateMachineSingletonFactory():
     def __init__(self):

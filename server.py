@@ -8,6 +8,7 @@ At least, return the cutted list
 
 from operations import StateMachineSingletonFactory
 from operations import SliceMachine1, SliceMachine2, CommonMachine
+import re
 
 
 '''
@@ -59,10 +60,16 @@ class Server():
         self.parse_line(self.prepared_line)
         self.handle_package()
 
-        
     def parse_line(self,line):
-        splitter = "   " # or "\b{3}" for re module
+        self.re_parse_line(line)
+        
+    def simple_parse_line(self,line):
+        splitter = "   " # 3 spaces
         self.parsed_sequence = line.split(splitter)
+        
+    def re_parse_line(self,line):
+        delimiter = re.compile("\s{3}")
+        self.parsed_sequence = re.split(delimiter, line)
         
     def handle_package(self):
         assert self.stored_previous_partial is not None
@@ -108,12 +115,8 @@ if __name__ == "__main__":
     pass
 
     sv = Server()
-    data_path = "/home/linnan/IT/python_projects/various_codes/nlp/word_slice/data"
-    sv.file_handler(data_path)
-    sv.slice_lines()
-    cutted_list = sv.cutted_list
-    print cutted_list
-    print sv.sliced_list_to_line()
+    sv.parse_line("a   I")
+    print sv.parsed_sequence
     
     # ['a', 'bc', '\n', 'def', 'ab']  ss
 
