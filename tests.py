@@ -157,10 +157,11 @@ class ServerTest(unittest.TestCase):
         self.assertEquals('',sv.new_partial)
         self.assertEquals([],sv.cutted_list)
         sv.lines = ['a   B\n','b   B\n','c   I\n','d   B\n','e   I\n','f   I\n', \
-        '\n','a   B\n','b   I\n','c   B\n']
+        '\n','g   B\n','h   I\n','i   B\n']
         sv.slice_lines()
-        self.assertEquals('ab',sv.sm.cutted)
-        self.assertEquals(['a', 'bc', '\n', 'def', 'ab'], sv.cutted_list)
+        self.assertEquals('gh',sv.sm.cutted)
+        self.assertEquals(['a', 'bc', '\n', 'def', 'gh'], sv.cutted_list)
+
   
     def test_handle_result(self):
         print "::test_handle_result starts ..."
