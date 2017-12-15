@@ -57,22 +57,21 @@ class ServerTest(unittest.TestCase):
         except AttributeError:
             raise KeyError("Key sv.cutted does not exist, \n \
             probably because the sv didn't finish slicing or cutting?")
-            
-
-    def test_parse_line(self):
-        print "::test_parse_line starts ..."
-        sv = Server()
-        line = 'z   I'
-        sv.parse_line(line)
-        self.assertEquals(['z','I'], sv.parsed_sequence)
-        
+    
     def test_prepare_line(self):
         print "::test_prepare_line starts ..."
         sv = Server()
         line = 's   B\n'
         sv.prepare_line(line)
         self.assertEquals('s   B', sv.prepared_line)
-      
+
+        def test_parse_line(self):
+        print "::test_parse_line starts ..."
+        sv = Server()
+        line = 'z   I'
+        sv.parse_line(line)
+        self.assertEquals(['z','I'], sv.parsed_sequence)
+    
     def test_take_machine(self):
         print "::test_take_machine starts ..."
         sv = Server(cutted_list=[])
