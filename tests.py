@@ -26,6 +26,8 @@ class MachineTests(unittest.TestCase):
         self.assertEquals('m', self.sm1.new_partial)
         
     def test_machine1_slice_with_pre_partial(self):
+        # When 's' is encountered as the beginning(B) of another word 
+        # Cut the word partial 'haha' as a whole new word 'haha' 
         self.sm1.previous_partial = 'haha'
         self.sm1.parsed_sequence = ('s','B')
         self.sm1.do_slice()
@@ -33,6 +35,8 @@ class MachineTests(unittest.TestCase):
         self.assertEquals('s', self.sm1.new_partial)
     
     def test_machine2_slice(self):
+        # When 'y' is encountered as the middle(I) part of a word
+        # Do not cut the word partial 'lala' as a whole new word
         self.sm2.previous_partial = 'lala'
         self.sm2.parsed_sequence = ('y','I')
         self.sm2.do_slice()
