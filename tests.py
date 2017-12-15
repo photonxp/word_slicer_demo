@@ -65,7 +65,7 @@ class ServerTest(unittest.TestCase):
         sv.prepare_line(line)
         self.assertEquals('s   B', sv.prepared_line)
 
-        def test_parse_line(self):
+    def test_parse_line(self):
         print "::test_parse_line starts ..."
         sv = Server()
         line = 'z   I'
