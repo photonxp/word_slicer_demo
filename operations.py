@@ -18,6 +18,7 @@ class StateMachineSingletonFactory():
     def __init__(self):
         self.MACHINE_1_IS_SINGLE = False
         self.MACHINE_2_IS_SINGLE = False
+        self.mark = ''
         
     def dispatch_machine(self,mark):
         """get the proper slice machine after check and set it successfully"""
@@ -46,73 +47,42 @@ class StateMachineSingletonFactory():
         self.sm = self.slicemachine2
 
 class CommonMachine():
-    def _set_readed_partial(self, parsed_sequence=None):
+    def __init__(self, partial=None, parsed_sequence=None):
+        if partial is not None:
+            self.previous_partial = partial
         if parsed_sequence is not None:
-            self.readed_partial = parsed_sequence[0]
-        else:
-            self.readed_partial = self.parsed_sequence[0]
-            
-    def _begin_partial(self, parsed_sequence=None):
-        self.new_partial = self.readed_partial
+            self.parsed_sequence = parsed_sequence
+        print "Hi, I'm %s, I am called........." % self.__class__.__name__
 
-    def _cut_and_part(self):
+    def _set_readed_partial(self):
+        self.readed_partial = self.parsed_sequence[0]
+            
+    def do_slice(self):
+        print "Hi, I'm %s, I am doing the slice........." % self.__class__.__name__
         self._cut_previous()
         self._set_readed_partial()
-        self._begin_partial()
+        self._set_new_partial()
         self.slice_result = [self.cutted, self.new_partial]
         return self.slice_result
 
-    def do_slice(self):
-        pass
-
 class SliceMachine1(CommonMachine):
-    """slice when need to handle existed word partial"""
-    def __init__(self, partial=None, parsed_sequence=None):
-        if partial is not None:
-            self.previous_partial = partial
-        if parsed_sequence is not None:
-            self.parsed_sequence = parsed_sequence
-        print "Hi, I'm SliceMachine1, I am called........."
+    """Machine to cut word"""
 
     def _cut_previous(self):
         self.cutted = self.previous_partial
-
-    def do_slice(self):
-        print "Hi, I'm SliceMachine1, I am doing the slice........."
-        return self._cut_and_part()
+    
+    def _set_new_partial(self):
+        self.new_partial = self.readed_partial
 
 class SliceMachine2(CommonMachine):
-    """
-    Slice when need to handle existed word partial
-     and append it with prevous partial to generate new partial.
-    """
-    def __init__(self, partial=None, parsed_sequence=None):
-        if partial is not None:
-            self.previous_partial = partial
-        if parsed_sequence is not None:
-            self.parsed_sequence = parsed_sequence
-        print "Hi, I'm SliceMachine2, I am called........."
+    """Machine to join word"""
 
     def _cut_previous(self):
         self.cutted = ""
 
-    def _append_partial(self, readed_sequence=None):
+    def _set_new_partial(self):
         self.new_partial = self.previous_partial + self.readed_partial
-        
-    def _cut_and_part(self):
-        self._cut_previous()
-        self._set_readed_partial()
-        self._append_partial()
-        self.slice_result = [self.cutted, self.new_partial]
-        return self.slice_result
-
-    def do_slice(self):
-        print "Hi, I'm SliceMachine2, I am doing the slice........."
-        return self._cut_and_part()
-
 
 if __name__ == "__main__":
-
     print 'OK'
-
 
