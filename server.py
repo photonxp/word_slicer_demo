@@ -9,114 +9,128 @@ At least, return the cutted list
 from operations import StateMachineSingletonFactory
 from operations import SliceMachine1, SliceMachine2, CommonMachine
 import re
+from copy import deepcopy
 
 
 '''
 Write the document as code
 '''
 
-letter_marked = 'r'
-partial = {'previous':'STORED_PREVIOUS','readed':letter_marked}
+partial = ['old_stored_partial','stored_partial']
 
-stored_previous_partial = partial['previous']
-
-
-SLICE_STATE_1 = (stored_previous_partial,[letter_marked,'B'],'SliceMachine1')
-SLICE_STATE_2 = (stored_previous_partial,[letter_marked,'I'],'SliceMachine2')
+SLICE_STATE_1 = ('stored_partial_value',['letter_tag','B'],'SliceMachine1')
+SLICE_STATE_2 = ('stored_partial_value',['letter_tag','I'],'SliceMachine2')
 
 class Server():
+    """
+    Parce data file. 
+    Use ParcedDataHandler to call slice machines to handled the parced data
+    """
     def __init__(self,cutted_list=[]):
-        print "... Impossible ... Could cutted_list be changed?:", cutted_list 
         self.cutted_list = cutted_list
-        print "Soooooo strange, am I [] or ['cuu']? :", self.cutted_list 
-        self.stored_previous_partial = ''
+        self.old_partial = ''
         self.new_partial = ''
         self.singleton_factory = StateMachineSingletonFactory()
-        print "Finished singleton_factory, am I changed at cutted_list? :", self.cutted_list 
         
-    def file_handler(self,data_path):
+    def read_tag_file(self,data_path):
         self.data_path = data_path
         f = open(data_path,'r')
-        self.lines = f.readlines()
+        self.filelines = f.readlines()
         f.close()
 
-    def slice_lines(self):
-        # new line would be parsed as a new-line-word.      
-        for line in self.lines:
-            self.file_line = line
-            if '\n' == line:
-                self.cutted_list.append('\n')
-                continue
-        
-            self.prepare_line(line)
-            self.slice_line()
-            self.handle_result()
-            
     def prepare_line(self,line):
         line = line.rstrip('\n')
         self.prepared_line = line 
 
-    def slice_line(self):
-        self.parse_line(self.prepared_line)
-        self.handle_package()
-
-    def parse_line(self,line):
-        self.re_parse_line(line)
-        
     def simple_parse_line(self,line):
         splitter = "   " # 3 spaces
-        self.parsed_sequence = line.split(splitter)
+        self.parsed_sequence = tuple(line.split(splitter))
         
     def re_parse_line(self,line):
         delimiter = re.compile("\s{3}")
-        self.parsed_sequence = re.split(delimiter, line)
+        self.parsed_sequence = tuple(re.split(delimiter, line))
         
-    def handle_package(self):
-        assert self.stored_previous_partial is not None
-        self.take_machine()
-        self.update_machine_data_before_slice()
-        self.sm.do_slice()
-        
-    def take_machine(self):
-        #SliceMachineSingletonFactory.get_state_machine
-        self.mark = self.parsed_sequence[1]
-        self.sm = self.singleton_factory.dispatch_machine(self.mark)   
-        
-    def update_machine_data_before_slice(self):
-        self.sm.previous_partial = self.stored_previous_partial
-        self.sm.parsed_sequence = self.parsed_sequence
-        self.sm.mark = self.mark
-            
-    def handle_result(self):
-        assert len(self.sm.slice_result) > 0
-        self.slice_result = self.sm.slice_result
-        self.update_server_data()
-    
-    def update_server_data(self):
-        self.update_cutted_list()
-        self.stored_previous_partial = self.slice_result[1]
-        self.cutted = self.slice_result[0]
-        
-    def update_cutted_list(self):
-        cutted = self.sm.slice_result[0]
+    def parse_line(self,line):
+        self.prepare_line(line)
+        self.re_parse_line(self.prepared_line)
+ 
+    def parse_lines(self):
+        self.parsed_line_sequence_list = []
+        for line in self.filelines:
+            self.parse_line(line)
+            self.parsed_line_sequence_list.append(self.parsed_sequence)
+
+    def handle_data(self):
+        self.read_tag_file("./data")
+        self.parse_lines()
+        print "self.parsed_line_sequence_list", self.parsed_line_sequence_list
+        handler = ParcedDataHandler(parsed_line_sequence_list = self.parsed_line_sequence_list)  
+        handler.slice_lines()
+        print "handler.cutted_list", handler.cutted_list
+        return handler
+
+class ParcedDataHandler():
+    """ Handle parced data in Server. Return slice result """
+    def __init__(self, cutted_list=[], parsed_line_sequence_list=[]):
+        self.cutted_list = deepcopy(cutted_list)
+        self.parsed_line_sequence_list = deepcopy(parsed_line_sequence_list)
+        # old_stored_partial is used to save old value 
+        #     when stored_partial is updated 
+        #     after SliceMachine.previous_partial return new partial value 
+        self.old_stored_partial = ''
+        # stored_partial is sent to SliceMachine.previous_partial
+        #     and would receive new partial value 
+        #     from SliceMachine.slice_result
+        self.stored_partial = ''
+        self.singleton_factory = StateMachineSingletonFactory()
+
+    def get_machine(self, mark):
+        sm = self.singleton_factory.dispatch_machine(mark)   
+        return sm
+
+    def update_cutted_list(self, sm):
+        cutted = sm.slice_result[0]
         if '' != cutted:
+            print "cutted in update_cutted_list:", cutted  
             self.cutted_list.append(cutted)
             
-    def sliced_list_to_line(self):
+    def get_machine_result(self, sm):
+        self.update_cutted_list(sm)
+        self.old_stored_partial = self.stored_partial
+        self.stored_partial = sm.slice_result[1]
+        #self.cutted = sm.cutted
+        
+    def slice_line(self, parcedTuple):
+        #self.handle_package(parcedTuple)
+        assert self.stored_partial is not None
+        mark = parcedTuple[1]
+        sm = self.get_machine(mark)
+        sm.__init__(self.stored_partial, parcedTuple)
+        sm.do_slice()
+        self.get_machine_result(sm)
+        #return sm
+
+    def slice_lines(self):
+        # a new line in the data file would be eventually parsed as ("",)      
+        # self.parsed_line_sequence_list should be already parced to a list of tuples
+        for parcedLineTuple in self.parsed_line_sequence_list:
+            if "" == parcedLineTuple[0]:
+                self.cutted_list.append('\n')
+                continue
+            sm = self.slice_line(parcedLineTuple)
+            
+    def cutted_list_to_line(self):
         lines = ""
         for line in self.cutted_list:
             if "\n" != line:
-                lines = lines + line + "\n"
+                lines = lines.join([line, "\n"])
         return lines
-            
-
         
 if __name__ == "__main__":
     pass
 
     sv = Server()
-    sv.parse_line("a   I")
-    print sv.parsed_sequence
-    
-    # ['a', 'bc', '\n', 'def', 'ab']  ss
+    sv.handle_data()
 
+    # input ./data    
+    # output: ['a', 'bc', '\n', 'def', 'gh']
