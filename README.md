@@ -7,7 +7,7 @@ A simple demo to show how to slice words for letters already marked with tags, s
     b   B
     c   I
 
-Read the marked letters form ./data file
+Server read the marked letters form ./data file
 
 This demo can be used for NLP leaning.
 
