@@ -2,6 +2,7 @@ word_slicer_demo
 ================
 
 A simple demo to show how to slice words for letters already marked with tags, such as
+
     a   B
     b   B
     c   I
