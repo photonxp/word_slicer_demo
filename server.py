@@ -58,6 +58,8 @@ class Server():
         self.parsed_line_sequence_list = []
         for line in self.filelines:
             self.parse_line(line)
+            # [].append('a') won't return a list object
+            # Another python gotcha here
             self.parsed_line_sequence_list.append(self.parsed_sequence)
 
     def handle_data(self):
@@ -72,6 +74,9 @@ class Server():
 class ParcedDataHandler():
     """ Handle parced data in Server. Return slice result """
     def __init__(self, cutted_list=[], parsed_line_sequence_list=[]):
+        # Default arguement (cutted_list=[]) would only be evaluated once in python
+        #     So its memory id would be the same during the different object creation
+        #     One of classic python pitfall
         self.cutted_list = deepcopy(cutted_list)
         self.parsed_line_sequence_list = deepcopy(parsed_line_sequence_list)
         # old_stored_partial is used to save old value 
